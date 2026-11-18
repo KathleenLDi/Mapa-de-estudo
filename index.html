@@ -1,4 +1,549 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel de Estudos</title><style>:root{font-family:system-ui,Arial,sans-serif;color:#24354b;background:#f3f8fc}*{box-sizing:border-box}body{margin:0}main{max-width:1050px;margin:38px auto;padding:20px}.card{background:white;border:1px solid #dce9f4;border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 5px 20px #dce8f355}h1{font-size:26px}h2{font-size:19px}input,textarea,select,button{font:inherit;border:1px solid #cbddeb;border-radius:10px;padding:12px}input,textarea,select{width:100%;margin:6px 0 14px}button{background:#bcdcf5;color:#173957;cursor:pointer;font-weight:600}button:hover{background:#a7d0f0}.danger{background:#f5dede}.muted{color:#60758b;font-size:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}.hide{display:none!important}#auth{max-width:420px;margin:12vh auto}.timer{font-size:46px;font-variant-numeric:tabular-nums;margin:16px 0}nav{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}ul{padding-left:20px}li{margin:10px 0}canvas{max-width:100%}.actions{display:flex;gap:8px;flex-wrap:wrap}.status{min-height:20px}</style></head><body><main><section id="auth" class="card"><h1>Meu painel de estudos</h1><form id="login"><label>E-mail<input id="email" type="email" autocomplete="username" required></label><label>Senha<input id="password" type="password" autocomplete="current-password" required></label><button type="submit">Entrar</button><p id="loginmsg" class="muted status" role="status"></p></form></section><section id="app" class="hide"><nav><h1>Painel de estudos</h1><button id="logout">Sair</button></nav><p id="sync" class="muted" role="status"></p><div class="grid"><section class="card"><h2>Cronômetro</h2><label>Matéria<select id="subject"><option>Programação</option><option>Inglês</option></select></label><div id="clock" class="timer">00:00:00</div><label>Observações<textarea id="notes" rows="3" placeholder="O que você estudou?"></textarea></label><div class="actions"><button id="start">Iniciar</button><button id="pause">Pausar</button><button id="save">Salvar sessão</button></div></section><section class="card"><h2>Cronograma</h2><form id="addtask"><label>Atividade<input id="task" required placeholder="Ex.: Revisar JavaScript"></label><label>Data<input id="date" type="date" required></label><button>Adicionar</button></form><ul id="tasks"></ul></section></div><div class="grid"><section class="card"><h2>Histórico</h2><ul id="history"></ul></section><section class="card"><h2>Evolução</h2><canvas id="chart" width="450" height="220" aria-label="Minutos estudados nos últimos sete dias" role="img"></canvas></section></div></section></main><script type="module">
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const URL='https://mhqucfsshhmzrzukstlj.supabase.co';const KEY='sb_publishable_8R_M_Fr5QNNSIjPJZgjwVA_1G4I9tqS';const sb=createClient(URL,KEY);const $=id=>document.getElementById(id);let user=null,elapsed=0,running=false,last=0,ticker=null,sessions=[],tasks=[];const pad=n=>String(n).padStart(2,'0');const fmt=s=>`${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function key(t){return `estudos_${user.id}_${t}`};function localLoad(t){try{return JSON.parse(localStorage.getItem(key(t)))||[]}catch{return []}}function localSave(t,data){localStorage.setItem(key(t),JSON.stringify(data))}function tick(){if(running){let now=Date.now();elapsed+=Math.floor((now-last)/1000);last=now} $('clock').textContent=fmt(elapsed)}function draw(){const ctx=$('chart').getContext('2d');ctx.clearRect(0,0,450,220);const days=Array.from({length:7},(_,i)=>{let d=new Date();d.setDate(d.getDate()-6+i);return d.toISOString().slice(0,10)});const vals=days.map(d=>sessions.filter(s=>s.date===d).reduce((n,s)=>n+s.seconds/60,0));const max=Math.max(30,...vals);days.forEach((d,i)=>{let x=20+i*61,h=145*vals[i]/max;ctx.fillStyle='#a8d2f0';ctx.fillRect(x,170-h,38,h);ctx.fillStyle='#60758b';ctx.font='12px sans-serif';ctx.fillText(d.slice(5),x,191);ctx.fillText(String(Math.round(vals[i])),x,165-h)});ctx.fillText('Minutos por dia',20,16)}function render(){ $('history').innerHTML=sessions.length?sessions.slice().reverse().map(s=>`<li>${safe(s.date)} · ${safe(s.subject)} · ${fmt(s.seconds)}${s.notes?' — '+safe(s.notes):''}</li>`).join(''):'<li class="muted">Nenhuma sessão registrada.</li>';$('tasks').innerHTML=tasks.length?tasks.map((t,i)=>`<li>${safe(t.date)} · ${safe(t.name)} <button data-del="${i}" class="danger" type="button">Excluir</button></li>`).join(''):'<li class="muted">Nenhuma atividade cadastrada.</li>';draw()}async function enter(u){user=u;$('auth').classList.add('hide');$('app').classList.remove('hide');sessions=localLoad('sessions');tasks=localLoad('tasks');render();$('sync').textContent='Cronograma salvo neste navegador. Verificando sincronização das sessões…';const {data,error}=await sb.from('sessoes_estudo').select('*').eq('user_id',u.id).order('created_at',{ascending:true});if(error){$('sync').textContent='Sessões salvas localmente neste navegador; sincronização com o banco ainda precisa ser validada.';return}if(data?.length){sessions=data.map(s=>({date:(s.inicio||s.created_at||new Date().toISOString()).slice(0,10),subject:s.materia||'Estudo',seconds:Number(s.duracao_segundos||0),notes:s.observacoes||''}));localSave('sessions',sessions);render()}$('sync').textContent='Conectado ao Supabase. Confira se os campos da tabela correspondem ao painel.'}async function authState(){const {data}=await sb.auth.getUser();if(data.user)enter(data.user)}$('login').onsubmit=async e=>{e.preventDefault();$('loginmsg').textContent='Entrando…';const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){$('loginmsg').textContent='Não foi possível entrar: '+error.message;return}$('loginmsg').textContent='';enter(data.user)};$('logout').onclick=async()=>{await sb.auth.signOut();location.reload()};$('start').onclick=()=>{if(!running){running=true;last=Date.now();ticker=setInterval(tick,250)}};$('pause').onclick=()=>{tick();running=false;clearInterval(ticker)};$('save').onclick=async()=>{tick();if(!elapsed){alert('Inicie o cronômetro antes de salvar.');return}let s={date:new Date().toISOString().slice(0,10),subject:$('subject').value,seconds:elapsed,notes:$('notes').value};sessions.push(s);localSave('sessions',sessions);render();running=false;clearInterval(ticker);elapsed=0;$('clock').textContent=fmt(0);$('notes').value='';const {error}=await sb.from('sessoes_estudo').insert({user_id:user.id,inicio:new Date(Date.now()-s.seconds*1000).toISOString(),fim:new Date().toISOString(),duracao_segundos:s.seconds,observacoes:s.notes});$('sync').textContent=error?'Sessão salva neste navegador. Não foi possível sincronizar: verifique as colunas do Supabase.':'Sessão salva no Supabase.'};$('addtask').onsubmit=e=>{e.preventDefault();tasks.push({name:$('task').value,date:$('date').value});localSave('tasks',tasks);$('addtask').reset();render()};$('tasks').onclick=e=>{let i=e.target.dataset.del;if(i!==undefined){tasks.splice(Number(i),1);localSave('tasks',tasks);render()}};authState();
-</script></body></html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel de Estudos</title>
+  <style>
+    :root {
+      font-family: system-ui, Arial, sans-serif;
+      color: #24354b;
+      background: #f3f8fc;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main {
+      max-width: 1050px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dce9f4;
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 5px 20px #dce8f355;
+    }
+    h1 { font-size: 26px; }
+    h2 { font-size: 19px; }
+    input, textarea, select, button {
+      font: inherit;
+      border: 1px solid #cbddeb;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    input, textarea, select {
+      width: 100%;
+      margin: 6px 0 14px;
+    }
+    button {
+      background: #bcdcf5;
+      color: #173957;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: #a7d0f0; }
+    button.active { background: #86bce8; }
+    .danger { background: #f5dede; }
+    .muted { color: #60758b; font-size: 14px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .hide { display: none !important; }
+    #auth {
+      max-width: 420px;
+      margin: 12vh auto;
+    }
+    .timer {
+      font-size: 46px;
+      font-variant-numeric: tabular-nums;
+      margin: 16px 0;
+    }
+    nav, .actions, .tabs {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    nav { justify-content: space-between; }
+    .tabs { margin: 20px 0; }
+    ul { padding-left: 20px; }
+    li { margin: 10px 0; }
+    canvas { max-width: 100%; }
+    .status { min-height: 20px; }
+  </style>
+</head>
+
+<body>
+<main>
+  <section id="auth" class="card">
+    <h1>Meu painel de estudos</h1>
+    <form id="login">
+      <label>E-mail
+        <input id="email" type="email"
+          autocomplete="username" required>
+      </label>
+      <label>Senha
+        <input id="password" type="password"
+          autocomplete="current-password" required>
+      </label>
+      <button type="submit">Entrar</button>
+      <p id="loginmsg" class="muted status"
+        role="status"></p>
+    </form>
+  </section>
+
+  <section id="app" class="hide">
+    <nav>
+      <h1>Painel de estudos</h1>
+      <button id="logout">Sair</button>
+    </nav>
+
+    <div class="tabs">
+      <button id="tab-programacao" type="button">
+        Programação
+      </button>
+      <button id="tab-ingles" type="button">
+        Inglês
+      </button>
+    </div>
+
+    <section class="card">
+      <h2 id="topic-title">Conteúdos de Programação</h2>
+      <p class="muted">
+        Organize seus conteúdos no cronograma abaixo.
+      </p>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Cronômetro</h2>
+        <p id="current-subject">Programação</p>
+        <div id="clock" class="timer">00:00:00</div>
+
+        <label>Observações
+          <textarea id="notes" rows="3"
+            placeholder="O que você estudou?"></textarea>
+        </label>
+
+        <div class="actions">
+          <button id="start">Iniciar</button>
+          <button id="pause">Pausar</button>
+          <button id="save">Salvar sessão</button>
+        </div>
+        <p id="savemsg" class="muted" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>Cronograma</h2>
+        <form id="addtask">
+          <label>Atividade
+            <input id="task" required
+              placeholder="O que você vai estudar?">
+          </label>
+          <label>Data
+            <input id="date" type="date" required>
+          </label>
+          <button type="submit">Adicionar</button>
+        </form>
+        <ul id="tasks"></ul>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Histórico</h2>
+        <ul id="history"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Evolução</h2>
+        <canvas id="chart" width="450" height="220"
+          aria-label="Minutos estudados por dia"
+          role="img"></canvas>
+      </section>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { createClient } from
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL =
+  'https://mhqucfsshhmzrzukstlj.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_8R_M_Fr5QNNSIjPJZgjwVA_1G4I9tqS';
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+
+let user = null;
+let subject = 'Programação';
+let elapsed = 0;
+let running = false;
+let last = 0;
+let ticker = null;
+let sessions = [];
+let tasks = [];
+
+const pad = n => String(n).padStart(2, '0');
+
+function fmt(seconds) {
+  return [
+    Math.floor(seconds / 3600),
+    Math.floor((seconds % 3600) / 60),
+    seconds % 60
+  ].map(pad).join(':');
+}
+
+function today() {
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    pad(d.getMonth() + 1),
+    pad(d.getDate())
+  ].join('-');
+}
+
+function safe(value) {
+  return String(value ?? '').replace(
+    /[&<>"']/g,
+    c => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[c]
+  );
+}
+
+function storageKey(name) {
+  return `estudos_${user.id}_${name}`;
+}
+
+function localLoad(name) {
+  try {
+    return JSON.parse(
+      localStorage.getItem(storageKey(name))
+    ) || [];
+  } catch {
+    return [];
+  }
+}
+
+function localSave(name, data) {
+  localStorage.setItem(
+    storageKey(name),
+    JSON.stringify(data)
+  );
+}
+
+function tick() {
+  if (running) {
+    const now = Date.now();
+    const seconds = Math.floor((now - last) / 1000);
+    elapsed += seconds;
+    last += seconds * 1000;
+  }
+  $('clock').textContent = fmt(elapsed);
+}
+
+function selectSubject(value) {
+  if (running || elapsed > 0) {
+    alert('Salve ou finalize a sessão antes de trocar de matéria.');
+    return;
+  }
+
+  subject = value;
+  $('current-subject').textContent = value;
+  $('topic-title').textContent =
+    'Conteúdos de ' + value;
+
+  $('tab-programacao').classList.toggle(
+    'active', value === 'Programação'
+  );
+  $('tab-ingles').classList.toggle(
+    'active', value === 'Inglês'
+  );
+
+  render();
+}
+
+$('tab-programacao').onclick = () =>
+  selectSubject('Programação');
+
+$('tab-ingles').onclick = () =>
+  selectSubject('Inglês');
+
+function draw() {
+  const canvas = $('chart');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const filtered = sessions.filter(
+    s => s.subject === subject
+  );
+
+  const days = [...new Set(
+    filtered.map(s => s.date)
+  )].sort().slice(-7);
+
+  ctx.fillStyle = '#60758b';
+  ctx.font = '14px sans-serif';
+
+  if (!days.length) {
+    ctx.fillText(
+      'Nenhum estudo registrado ainda.',
+      20, 100
+    );
+    return;
+  }
+
+  const values = days.map(date =>
+    filtered
+      .filter(s => s.date === date)
+      .reduce((sum, s) =>
+        sum + Number(s.seconds || 0) / 60, 0
+      )
+  );
+
+  const max = Math.max(1, ...values);
+  const slot = 420 / days.length;
+  const barWidth = Math.min(38, slot - 10);
+
+  ctx.fillText('Minutos estudados', 20, 18);
+
+  days.forEach((date, i) => {
+    const x = 20 + i * slot;
+    const height = 135 * values[i] / max;
+
+    ctx.fillStyle = '#a8d2f0';
+    ctx.fillRect(
+      x, 170 - height, barWidth, height
+    );
+
+    ctx.fillStyle = '#60758b';
+    ctx.font = '12px sans-serif';
+
+    ctx.fillText(
+      date.slice(8, 10) + '/' + date.slice(5, 7),
+      x, 192
+    );
+
+    ctx.fillText(
+      String(Math.round(values[i])),
+      x, 162 - height
+    );
+  });
+}
+
+function render() {
+  const filteredSessions = sessions.filter(
+    s => s.subject === subject
+  );
+
+  $('history').innerHTML = filteredSessions.length
+    ? filteredSessions.slice().reverse().map(s => `
+        <li>
+          ${safe(s.date)} · ${fmt(s.seconds)}
+          ${s.notes ? ' — ' + safe(s.notes) : ''}
+        </li>
+      `).join('')
+    : '<li class="muted">Nenhuma sessão registrada.</li>';
+
+  const filteredTasks = tasks
+    .map((task, index) => ({ ...task, index }))
+    .filter(task => task.subject === subject);
+
+  $('tasks').innerHTML = filteredTasks.length
+    ? filteredTasks.map(task => `
+        <li>
+          ${safe(task.date)} · ${safe(task.name)}
+          <button type="button" class="danger"
+            data-del="${task.index}">
+            Excluir
+          </button>
+        </li>
+      `).join('')
+    : '<li class="muted">Nenhuma atividade cadastrada.</li>';
+
+  draw();
+}
+
+async function enter(u) {
+  user = u;
+
+  $('auth').classList.add('hide');
+  $('app').classList.remove('hide');
+
+  sessions = localLoad('sessions');
+  tasks = localLoad('tasks').map(t => ({
+    ...t,
+    subject: t.subject || 'Programação'
+  }));
+
+  render();
+
+  const { data, error } = await sb
+    .from('sessoes_estudo')
+    .select('*')
+    .eq('user_id', u.id)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.warn('Erro de sincronização:', error);
+    return;
+  }
+
+  if (data?.length) {
+    sessions = data.map(s => ({
+      date: (
+        s.inicio ||
+        s.created_at ||
+        new Date().toISOString()
+      ).slice(0, 10),
+      subject: s.materia || 'Programação',
+      seconds: Number(s.duracao_segundos || 0),
+      notes: s.observacoes || ''
+    }));
+
+    localSave('sessions', sessions);
+    render();
+  }
+}
+
+async function authState() {
+  const { data } = await sb.auth.getUser();
+  if (data.user) await enter(data.user);
+}
+
+$('login').onsubmit = async event => {
+  event.preventDefault();
+
+  $('loginmsg').textContent = 'Entrando...';
+
+  const { data, error } =
+    await sb.auth.signInWithPassword({
+      email: $('email').value.trim(),
+      password: $('password').value
+    });
+
+  if (error) {
+    $('loginmsg').textContent =
+      'Não foi possível entrar: ' + error.message;
+    return;
+  }
+
+  $('loginmsg').textContent = '';
+  await enter(data.user);
+};
+
+$('logout').onclick = async () => {
+  await sb.auth.signOut();
+  location.reload();
+};
+
+$('start').onclick = () => {
+  if (!running) {
+    running = true;
+    last = Date.now();
+    ticker = setInterval(tick, 250);
+  }
+};
+
+$('pause').onclick = () => {
+  tick();
+  running = false;
+  clearInterval(ticker);
+};
+
+$('save').onclick = async () => {
+  tick();
+
+  if (!elapsed) {
+    alert('Inicie o cronômetro antes de salvar.');
+    return;
+  }
+
+  running = false;
+  clearInterval(ticker);
+
+  const seconds = elapsed;
+  const end = new Date();
+  const start = new Date(
+    end.getTime() - seconds * 1000
+  );
+
+  const session = {
+    date: today(),
+    subject,
+    seconds,
+    notes: $('notes').value
+  };
+
+  sessions.push(session);
+  localSave('sessions', sessions);
+
+  elapsed = 0;
+  $('clock').textContent = fmt(0);
+  $('notes').value = '';
+
+  render();
+
+  const { error } = await sb
+    .from('sessoes_estudo')
+    .insert({
+      user_id: user.id,
+      inicio: start.toISOString(),
+      fim: end.toISOString(),
+      duracao_segundos: seconds,
+      observacoes: session.notes
+    });
+
+  if (error) {
+    console.warn('Erro ao salvar no Supabase:', error);
+    $('savemsg').textContent =
+      'Sessão salva neste navegador. ' +
+      'A sincronização precisa ser verificada.';
+  } else {
+    $('savemsg').textContent = 'Sessão salva.';
+  }
+};
+
+$('addtask').onsubmit = event => {
+  event.preventDefault();
+
+  tasks.push({
+    name: $('task').value,
+    date: $('date').value,
+    subject
+  });
+
+  localSave('tasks', tasks);
+  $('addtask').reset();
+  render();
+};
+
+$('tasks').onclick = event => {
+  const button = event.target.closest('[data-del]');
+  if (!button) return;
+
+  const index = Number(button.dataset.del);
+  tasks.splice(index, 1);
+
+  localSave('tasks', tasks);
+  render();
+};
+
+selectSubject('Programação');
+authState();
+</script>
+</body>
+</html>
