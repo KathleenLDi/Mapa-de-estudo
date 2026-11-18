@@ -2,213 +2,251 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Painel de Estudos</title>
-  <style>
-    :root {
-      font-family: system-ui, Arial, sans-serif;
-      color: #24354b;
-      background: #f3f8fc;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; }
-    main {
-      max-width: 1050px;
-      margin: 30px auto;
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      border: 1px solid #dce9f4;
-      border-radius: 18px;
-      padding: 24px;
-      margin-bottom: 18px;
-      box-shadow: 0 5px 20px #dce8f355;
-    }
-    h1 { font-size: 26px; }
-    h2 { font-size: 19px; }
-    input, textarea, select, button {
-      font: inherit;
-      border: 1px solid #cbddeb;
-      border-radius: 10px;
-      padding: 12px;
-    }
-    input, textarea, select {
-      width: 100%;
-      margin: 6px 0 14px;
-    }
-    button {
-      background: #bcdcf5;
-      color: #173957;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    button:hover { background: #a7d0f0; }
-    button.active { background: #86bce8; }
-    .danger { background: #f5dede; }
-    .muted { color: #60758b; font-size: 14px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 18px;
-    }
-    .hide { display: none !important; }
-    #auth {
-      max-width: 420px;
-      margin: 12vh auto;
-    }
-    .timer {
-      font-size: 46px;
-      font-variant-numeric: tabular-nums;
-      margin: 16px 0;
-    }
-    nav, .actions, .tabs {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    nav { justify-content: space-between; }
-    .tabs { margin: 20px 0; }
-    ul { padding-left: 20px; }
-    li { margin: 10px 0; }
-    canvas { max-width: 100%; }
-    .status { min-height: 20px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel de Estudos</title>
+<style>
+:root {
+  font-family: system-ui, Arial, sans-serif;
+  color: #24354b;
+  background: #f3f8fc;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+main {
+  max-width: 1080px;
+  margin: 20px auto;
+  padding: 16px;
+}
+.card {
+  background: white;
+  border: 1px solid #dce9f4;
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+h1 { font-size: 25px; }
+h2 { font-size: 19px; margin-top: 0; }
+label { display: block; margin: 12px 0; }
+input, textarea, select, button {
+  font: inherit;
+  border: 1px solid #cbddeb;
+  border-radius: 9px;
+  padding: 11px;
+}
+input:not([type="checkbox"]),
+textarea, select {
+  width: 100%;
+  margin-top: 6px;
+}
+button {
+  background: #bcdcf5;
+  color: #173957;
+  cursor: pointer;
+  font-weight: 600;
+}
+button:hover { background: #a7d0f0; }
+button.active { background: #85bce7; }
+button.danger { background: #f5dede; }
+button.small { padding: 6px 9px; }
+.muted { color: #60758b; font-size: 14px; }
+.hide { display: none !important; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.grid > .card { min-width: 0; }
+@media(max-width: 700px) {
+  .grid { grid-template-columns: 1fr; }
+}
+#auth {
+  max-width: 420px;
+  margin: 10vh auto;
+}
+.header {
+  position: relative;
+  text-align: center;
+  padding: 8px 75px;
+  margin-bottom: 18px;
+}
+.header h1 { margin: 0; }
+#logout {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.tabs, .actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.tabs { margin-bottom: 18px; }
+.timer {
+  font-size: 42px;
+  font-variant-numeric: tabular-nums;
+  margin: 20px 0;
+}
+.task-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+.task-row input { margin-top: 5px; }
+.task-info { flex: 1; min-width: 0; }
+.task-done { text-decoration: line-through; color: #7c8b9a; }
+.history-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+.history-item strong { display: block; }
+canvas { max-width: 100%; }
+.status { min-height: 20px; }
+</style>
 </head>
 
 <body>
 <main>
-  <section id="auth" class="card">
-    <h1>Meu painel de estudos</h1>
-    <form id="login">
-      <label>E-mail
-        <input id="email" type="email"
-          autocomplete="username" required>
-      </label>
-      <label>Senha
-        <input id="password" type="password"
-          autocomplete="current-password" required>
-      </label>
-      <button type="submit">Entrar</button>
-      <p id="loginmsg" class="muted status"
-        role="status"></p>
-    </form>
-  </section>
 
-  <section id="app" class="hide">
-    <nav>
-      <h1>Painel de estudos</h1>
-      <button id="logout">Sair</button>
-    </nav>
+<section id="auth" class="card">
+  <h1>Meu painel de estudos</h1>
+  <form id="login">
+    <label>E-mail
+      <input id="email" type="email"
+        autocomplete="username" required>
+    </label>
+    <label>Senha
+      <input id="password" type="password"
+        autocomplete="current-password" required>
+    </label>
+    <button type="submit">Entrar</button>
+    <p id="loginmsg" class="muted" role="status"></p>
+  </form>
+</section>
 
-    <div class="tabs">
-      <button id="tab-programacao" type="button">
-        Programação
-      </button>
-      <button id="tab-ingles" type="button">
-        Inglês
-      </button>
-    </div>
+<section id="app" class="hide">
+
+  <header class="header">
+    <h1>Painel de Estudos</h1>
+    <button id="logout">Sair</button>
+  </header>
+
+  <div id="tabs" class="tabs"></div>
+
+  <div class="grid">
 
     <section class="card">
-      <h2 id="topic-title">Conteúdos de Programação</h2>
-      <p class="muted">
-        Organize seus conteúdos no cronograma abaixo.
-      </p>
-    </section>
-
-    <div class="grid">
-      <section class="card">
-        <h2>Cronômetro</h2>
-        <p id="current-subject">Programação</p>
-        <div id="clock" class="timer">00:00:00</div>
-
-        <label>Observações
-          <textarea id="notes" rows="3"
-            placeholder="O que você estudou?"></textarea>
+      <h2>Cronograma</h2>
+      <form id="addtask">
+        <label>Conteúdo / atividade
+          <input id="task" list="suggestions"
+            placeholder="Escolha ou digite um conteúdo"
+            required>
+          <datalist id="suggestions"></datalist>
         </label>
 
-        <div class="actions">
-          <button id="start">Iniciar</button>
-          <button id="pause">Pausar</button>
-          <button id="save">Salvar sessão</button>
-        </div>
-        <p id="savemsg" class="muted" role="status"></p>
-      </section>
+        <label>Data
+          <input id="date" type="date" required>
+        </label>
 
-      <section class="card">
-        <h2>Cronograma</h2>
-        <form id="addtask">
-          <label>Atividade
-            <input id="task" required
-              placeholder="O que você vai estudar?">
-          </label>
-          <label>Data
-            <input id="date" type="date" required>
-          </label>
-          <button type="submit">Adicionar</button>
-        </form>
-        <ul id="tasks"></ul>
-      </section>
-    </div>
+        <button type="submit">Adicionar atividade</button>
+      </form>
 
-    <div class="grid">
-      <section class="card">
-        <h2>Histórico</h2>
-        <ul id="history"></ul>
-      </section>
+      <div id="tasks"></div>
+    </section>
 
-      <section class="card">
-        <h2>Evolução</h2>
-        <canvas id="chart" width="450" height="220"
-          aria-label="Minutos estudados por dia"
-          role="img"></canvas>
-      </section>
-    </div>
-  </section>
+    <section class="card">
+      <h2>Cronômetro</h2>
+      <p id="current-subject" class="muted"></p>
+
+      <label>Atividade estudada
+        <select id="study-task"></select>
+      </label>
+
+      <div id="clock" class="timer">00:00:00</div>
+
+      <label>Observações
+        <textarea id="notes" rows="3"
+          placeholder="O que você aprendeu?"></textarea>
+      </label>
+
+      <div class="actions">
+        <button id="start">Iniciar</button>
+        <button id="pause">Pausar</button>
+        <button id="save">Salvar sessão</button>
+      </div>
+
+      <p id="savemsg" class="muted" role="status"></p>
+    </section>
+
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Histórico</h2>
+      <div id="history"></div>
+    </section>
+
+    <section class="card">
+      <h2>Evolução</h2>
+      <canvas id="chart" width="450" height="220"
+        aria-label="Minutos estudados por dia"></canvas>
+    </section>
+  </div>
+
+</section>
 </main>
 
 <script type="module">
 import { createClient } from
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const SUPABASE_URL =
-  'https://mhqucfsshhmzrzukstlj.supabase.co';
+const sb = createClient(
+  'https://mhqucfsshhmzrzukstlj.supabase.co',
+  'sb_publishable_8R_M_Fr5QNNSIjPJZgjwVA_1G4I9tqS'
+);
 
-const SUPABASE_KEY =
-  'sb_publishable_8R_M_Fr5QNNSIjPJZgjwVA_1G4I9tqS';
-
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
 let user = null;
+let subjects = ['Programação', 'Inglês'];
 let subject = 'Programação';
+let tasks = [];
+let sessions = [];
+
 let elapsed = 0;
 let running = false;
 let last = 0;
 let ticker = null;
-let sessions = [];
-let tasks = [];
 
 const pad = n => String(n).padStart(2, '0');
 
 function fmt(seconds) {
   return [
     Math.floor(seconds / 3600),
-    Math.floor((seconds % 3600) / 60),
+    Math.floor(seconds % 3600 / 60),
     seconds % 60
   ].map(pad).join(':');
 }
 
-function today() {
+function localDate() {
   const d = new Date();
   return [
     d.getFullYear(),
     pad(d.getMonth() + 1),
     pad(d.getDate())
   ].join('-');
+}
+
+function formatDate(value) {
+  if (!value) return '';
+  const parts = value.slice(0, 10).split('-');
+  return parts.length === 3
+    ? `${parts[2]}/${parts[1]}/${parts[0]}`
+    : value;
 }
 
 function safe(value) {
@@ -228,64 +266,192 @@ function storageKey(name) {
   return `estudos_${user.id}_${name}`;
 }
 
-function localLoad(name) {
+function load(name, fallback = []) {
   try {
-    return JSON.parse(
+    const value = JSON.parse(
       localStorage.getItem(storageKey(name))
-    ) || [];
+    );
+    return value ?? fallback;
   } catch {
-    return [];
+    return fallback;
   }
 }
 
-function localSave(name, data) {
+function store(name, value) {
   localStorage.setItem(
     storageKey(name),
-    JSON.stringify(data)
+    JSON.stringify(value)
   );
+}
+
+function uid() {
+  return crypto.randomUUID();
+}
+
+// Sugestões iniciais, editáveis.
+// Não substituem o cronograma original.
+const suggestions = {
+  'Programação': [
+    'Introdução à lógica de programação',
+    'Algoritmos e pseudocódigo',
+    'Variáveis e tipos de dados',
+    'Operadores e expressões',
+    'Estruturas condicionais',
+    'Estruturas de repetição',
+    'Funções',
+    'Arrays e objetos',
+    'Introdução ao HTML',
+    'Introdução ao CSS',
+    'Introdução ao JavaScript'
+  ],
+  'Inglês': [
+    'Alfabeto e pronúncia',
+    'Cumprimentos e apresentações',
+    'Pronomes pessoais',
+    'Verbo to be',
+    'Artigos e substantivos',
+    'Vocabulário do cotidiano',
+    'Simple Present',
+    'Perguntas e respostas',
+    'Listening',
+    'Reading',
+    'Conversação'
+  ]
+};
+
+function renderTabs() {
+  $('tabs').innerHTML = '';
+
+  subjects.forEach(name => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = name;
+    button.classList.toggle('active', name === subject);
+    button.onclick = () => selectSubject(name);
+    $('tabs').appendChild(button);
+  });
+
+  const add = document.createElement('button');
+  add.type = 'button';
+  add.textContent = '+ Adicionar matéria';
+  add.onclick = addSubject;
+  $('tabs').appendChild(add);
+}
+
+function addSubject() {
+  if (running || elapsed > 0) {
+    alert('Salve a sessão antes de adicionar outra matéria.');
+    return;
+  }
+
+  const name = prompt('Nome da nova matéria:')?.trim();
+  if (!name) return;
+
+  if (subjects.some(
+    s => s.toLowerCase() === name.toLowerCase()
+  )) {
+    alert('Essa matéria já existe.');
+    return;
+  }
+
+  subjects.push(name);
+  store('subjects', subjects);
+  selectSubject(name);
+}
+
+function selectSubject(name) {
+  if (running || elapsed > 0) {
+    alert('Salve a sessão antes de trocar de matéria.');
+    return;
+  }
+
+  subject = name;
+  $('current-subject').textContent = name;
+  $('savemsg').textContent = '';
+
+  $('suggestions').innerHTML =
+    (suggestions[name] || [])
+      .map(item => `<option value="${safe(item)}">`)
+      .join('');
+
+  renderTabs();
+  render();
 }
 
 function tick() {
   if (running) {
     const now = Date.now();
-    const seconds = Math.floor((now - last) / 1000);
-    elapsed += seconds;
-    last += seconds * 1000;
+    const delta = Math.floor((now - last) / 1000);
+    elapsed += delta;
+    last += delta * 1000;
   }
+
   $('clock').textContent = fmt(elapsed);
 }
 
-function selectSubject(value) {
-  if (running || elapsed > 0) {
-    alert('Salve ou finalize a sessão antes de trocar de matéria.');
-    return;
+function renderTasks() {
+  const filtered = tasks
+    .filter(t => t.subject === subject)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  $('tasks').innerHTML = filtered.length
+    ? filtered.map(t => `
+      <div class="task-row">
+        <input type="checkbox"
+          data-check="${safe(t.id)}"
+          ${t.done ? 'checked' : ''}>
+        <div class="task-info">
+          <div class="${t.done ? 'task-done' : ''}">
+            ${safe(t.name)}
+          </div>
+          <div class="muted">${formatDate(t.date)}</div>
+        </div>
+        <button class="small danger"
+          data-del="${safe(t.id)}">Excluir</button>
+      </div>
+    `).join('')
+    : '<p class="muted">Nenhuma atividade cadastrada.</p>';
+
+  const current = $('study-task').value;
+
+  $('study-task').innerHTML =
+    '<option value="">Selecione uma atividade</option>' +
+    filtered.filter(t => !t.done).map(t => `
+      <option value="${safe(t.id)}">
+        ${safe(t.name)}
+      </option>
+    `).join('');
+
+  if (filtered.some(t => t.id === current && !t.done)) {
+    $('study-task').value = current;
   }
-
-  subject = value;
-  $('current-subject').textContent = value;
-  $('topic-title').textContent =
-    'Conteúdos de ' + value;
-
-  $('tab-programacao').classList.toggle(
-    'active', value === 'Programação'
-  );
-  $('tab-ingles').classList.toggle(
-    'active', value === 'Inglês'
-  );
-
-  render();
 }
 
-$('tab-programacao').onclick = () =>
-  selectSubject('Programação');
+function renderHistory() {
+  const filtered = sessions
+    .filter(s => s.subject === subject)
+    .slice()
+    .reverse();
 
-$('tab-ingles').onclick = () =>
-  selectSubject('Inglês');
+  $('history').innerHTML = filtered.length
+    ? filtered.map(s => `
+      <div class="history-item">
+        <strong>${safe(s.content || 'Estudo registrado')}</strong>
+        <div class="muted">
+          ${formatDate(s.date)} · ${fmt(s.seconds)}
+        </div>
+        ${s.notes
+          ? `<p>${safe(s.notes)}</p>`
+          : ''}
+      </div>
+    `).join('')
+    : '<p class="muted">Nenhuma sessão registrada.</p>';
+}
 
 function draw() {
   const canvas = $('chart');
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, 450, 220);
 
   const filtered = sessions.filter(
     s => s.subject === subject
@@ -307,8 +473,7 @@ function draw() {
   }
 
   const values = days.map(date =>
-    filtered
-      .filter(s => s.date === date)
+    filtered.filter(s => s.date === date)
       .reduce((sum, s) =>
         sum + Number(s.seconds || 0) / 60, 0
       )
@@ -316,7 +481,6 @@ function draw() {
 
   const max = Math.max(1, ...values);
   const slot = 420 / days.length;
-  const barWidth = Math.min(38, slot - 10);
 
   ctx.fillText('Minutos estudados', 20, 18);
 
@@ -326,17 +490,17 @@ function draw() {
 
     ctx.fillStyle = '#a8d2f0';
     ctx.fillRect(
-      x, 170 - height, barWidth, height
+      x, 170 - height,
+      Math.min(38, slot - 10),
+      height
     );
 
     ctx.fillStyle = '#60758b';
     ctx.font = '12px sans-serif';
-
     ctx.fillText(
-      date.slice(8, 10) + '/' + date.slice(5, 7),
+      formatDate(date).slice(0, 5),
       x, 192
     );
-
     ctx.fillText(
       String(Math.round(values[i])),
       x, 162 - height
@@ -345,88 +509,170 @@ function draw() {
 }
 
 function render() {
-  const filteredSessions = sessions.filter(
-    s => s.subject === subject
-  );
-
-  $('history').innerHTML = filteredSessions.length
-    ? filteredSessions.slice().reverse().map(s => `
-        <li>
-          ${safe(s.date)} · ${fmt(s.seconds)}
-          ${s.notes ? ' — ' + safe(s.notes) : ''}
-        </li>
-      `).join('')
-    : '<li class="muted">Nenhuma sessão registrada.</li>';
-
-  const filteredTasks = tasks
-    .map((task, index) => ({ ...task, index }))
-    .filter(task => task.subject === subject);
-
-  $('tasks').innerHTML = filteredTasks.length
-    ? filteredTasks.map(task => `
-        <li>
-          ${safe(task.date)} · ${safe(task.name)}
-          <button type="button" class="danger"
-            data-del="${task.index}">
-            Excluir
-          </button>
-        </li>
-      `).join('')
-    : '<li class="muted">Nenhuma atividade cadastrada.</li>';
-
+  renderTasks();
+  renderHistory();
   draw();
 }
+
+$('addtask').onsubmit = event => {
+  event.preventDefault();
+
+  tasks.push({
+    id: uid(),
+    subject,
+    name: $('task').value.trim(),
+    date: $('date').value,
+    done: false
+  });
+
+  store('tasks', tasks);
+  $('addtask').reset();
+  render();
+};
+
+$('tasks').onchange = event => {
+  const id = event.target.dataset.check;
+  if (!id) return;
+
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  task.done = event.target.checked;
+  store('tasks', tasks);
+  render();
+};
+
+$('tasks').onclick = event => {
+  const id = event.target.dataset.del;
+  if (!id) return;
+
+  tasks = tasks.filter(t => t.id !== id);
+  store('tasks', tasks);
+  render();
+};
+
+$('start').onclick = () => {
+  if (running) return;
+
+  if (!$('study-task').value) {
+    alert('Selecione uma atividade antes de iniciar.');
+    return;
+  }
+
+  running = true;
+  last = Date.now();
+  ticker = setInterval(tick, 250);
+};
+
+$('pause').onclick = () => {
+  tick();
+  running = false;
+  clearInterval(ticker);
+};
+
+$('save').onclick = async () => {
+  tick();
+
+  if (!elapsed) {
+    alert('Inicie o cronômetro antes de salvar.');
+    return;
+  }
+
+  const task = tasks.find(
+    t => t.id === $('study-task').value
+  );
+
+  if (!task) {
+    alert('Selecione uma atividade.');
+    return;
+  }
+
+  running = false;
+  clearInterval(ticker);
+
+  const seconds = elapsed;
+  const notes = $('notes').value.trim();
+  const end = new Date();
+
+  const session = {
+    id: uid(),
+    date: localDate(),
+    subject,
+    content: task.name,
+    seconds,
+    notes
+  };
+
+  sessions.push(session);
+  store('sessions', sessions);
+
+  task.done = true;
+  store('tasks', tasks);
+
+  elapsed = 0;
+  $('clock').textContent = fmt(0);
+  $('notes').value = '';
+  $('savemsg').textContent = 'Sessão salva.';
+  render();
+
+  // A tabela existente ainda precisa ser validada.
+  // Mantemos as colunas já usadas pelo painel.
+  const { error } = await sb
+    .from('sessoes_estudo')
+    .insert({
+      user_id: user.id,
+      inicio: new Date(
+        end.getTime() - seconds * 1000
+      ).toISOString(),
+      fim: end.toISOString(),
+      duracao_segundos: seconds,
+      observacoes: notes
+    });
+
+  if (error) {
+    console.warn('Erro de sincronização:', error);
+    $('savemsg').textContent =
+      'Salvo neste navegador. ' +
+      'Sincronização pendente.';
+  }
+};
 
 async function enter(u) {
   user = u;
 
+  subjects = load('subjects', [
+    'Programação', 'Inglês'
+  ]);
+
+  tasks = load('tasks').map(t => ({
+    ...t,
+    id: t.id || uid(),
+    subject: t.subject || 'Programação',
+    done: Boolean(t.done)
+  }));
+
+  sessions = load('sessions');
+
   $('auth').classList.add('hide');
   $('app').classList.remove('hide');
 
-  sessions = localLoad('sessions');
-  tasks = localLoad('tasks').map(t => ({
-    ...t,
-    subject: t.subject || 'Programação'
-  }));
+  selectSubject('Programação');
 
-  render();
-
-  const { data, error } = await sb
+  // Evita substituir os registros locais por
+  // dados incompletos da tabela antiga.
+  const { error } = await sb
     .from('sessoes_estudo')
-    .select('*')
+    .select('user_id')
     .eq('user_id', u.id)
-    .order('created_at', { ascending: true });
+    .limit(1);
 
   if (error) {
-    console.warn('Erro de sincronização:', error);
-    return;
+    console.warn('Verifique as permissões do Supabase:', error);
   }
-
-  if (data?.length) {
-    sessions = data.map(s => ({
-      date: (
-        s.inicio ||
-        s.created_at ||
-        new Date().toISOString()
-      ).slice(0, 10),
-      subject: s.materia || 'Programação',
-      seconds: Number(s.duracao_segundos || 0),
-      notes: s.observacoes || ''
-    }));
-
-    localSave('sessions', sessions);
-    render();
-  }
-}
-
-async function authState() {
-  const { data } = await sb.auth.getUser();
-  if (data.user) await enter(data.user);
 }
 
 $('login').onsubmit = async event => {
   event.preventDefault();
-
   $('loginmsg').textContent = 'Entrando...';
 
   const { data, error } =
@@ -450,99 +696,11 @@ $('logout').onclick = async () => {
   location.reload();
 };
 
-$('start').onclick = () => {
-  if (!running) {
-    running = true;
-    last = Date.now();
-    ticker = setInterval(tick, 250);
-  }
-};
+async function authState() {
+  const { data } = await sb.auth.getUser();
+  if (data.user) await enter(data.user);
+}
 
-$('pause').onclick = () => {
-  tick();
-  running = false;
-  clearInterval(ticker);
-};
-
-$('save').onclick = async () => {
-  tick();
-
-  if (!elapsed) {
-    alert('Inicie o cronômetro antes de salvar.');
-    return;
-  }
-
-  running = false;
-  clearInterval(ticker);
-
-  const seconds = elapsed;
-  const end = new Date();
-  const start = new Date(
-    end.getTime() - seconds * 1000
-  );
-
-  const session = {
-    date: today(),
-    subject,
-    seconds,
-    notes: $('notes').value
-  };
-
-  sessions.push(session);
-  localSave('sessions', sessions);
-
-  elapsed = 0;
-  $('clock').textContent = fmt(0);
-  $('notes').value = '';
-
-  render();
-
-  const { error } = await sb
-    .from('sessoes_estudo')
-    .insert({
-      user_id: user.id,
-      inicio: start.toISOString(),
-      fim: end.toISOString(),
-      duracao_segundos: seconds,
-      observacoes: session.notes
-    });
-
-  if (error) {
-    console.warn('Erro ao salvar no Supabase:', error);
-    $('savemsg').textContent =
-      'Sessão salva neste navegador. ' +
-      'A sincronização precisa ser verificada.';
-  } else {
-    $('savemsg').textContent = 'Sessão salva.';
-  }
-};
-
-$('addtask').onsubmit = event => {
-  event.preventDefault();
-
-  tasks.push({
-    name: $('task').value,
-    date: $('date').value,
-    subject
-  });
-
-  localSave('tasks', tasks);
-  $('addtask').reset();
-  render();
-};
-
-$('tasks').onclick = event => {
-  const button = event.target.closest('[data-del]');
-  if (!button) return;
-
-  const index = Number(button.dataset.del);
-  tasks.splice(index, 1);
-
-  localSave('tasks', tasks);
-  render();
-};
-
-selectSubject('Programação');
 authState();
 </script>
 </body>
