@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Painel de Estudos</title>
+
 <style>
 :root {
   font-family: system-ui, Arial, sans-serif;
@@ -13,9 +14,17 @@
   color-scheme: light;
   --cor: #bcdcf5;
 }
+
 * { box-sizing: border-box; }
+
 body { margin: 0; }
-main { max-width: 1080px; margin: 20px auto; padding: 16px; }
+
+main {
+  max-width: 1080px;
+  margin: 20px auto;
+  padding: 16px;
+}
+
 .card {
   background: white;
   border: 1px solid #dce9f4;
@@ -23,73 +32,146 @@ main { max-width: 1080px; margin: 20px auto; padding: 16px; }
   padding: 22px;
   margin-bottom: 16px;
 }
+
 h1 { font-size: 25px; }
 h2 { font-size: 19px; margin-top: 0; }
-label { display: block; margin: 12px 0; }
+
+label {
+  display: block;
+  margin: 12px 0;
+}
+
 input, textarea, select, button {
   font: inherit;
   border: 1px solid #cbddeb;
   border-radius: 9px;
   padding: 11px;
 }
-input:not([type="checkbox"]), textarea, select {
+
+input:not([type="checkbox"]):not([type="color"]),
+textarea, select {
   width: 100%;
   margin-top: 6px;
   background: white;
   color: #24354b;
 }
+
 button {
   background: #bcdcf5;
   color: #173957;
   cursor: pointer;
   font-weight: 600;
 }
+
 button:hover { filter: brightness(.96); }
-button.active { background: var(--cor); }
+
+button.active {
+  outline: 2px solid #24354b;
+  outline-offset: 2px;
+}
+
 .danger { background: #f5dede; }
 .small { padding: 6px 9px; }
 .muted { color: #60758b; font-size: 14px; }
 .hide { display: none !important; }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
+
 .grid > .card { min-width: 0; }
+
 @media(max-width: 700px) {
   .grid { grid-template-columns: 1fr; }
 }
+
 #auth {
   max-width: 420px;
   margin: 10vh auto;
 }
+
 #auth h1 { text-align: center; }
+
 .header {
   position: relative;
   text-align: center;
   padding: 8px 75px;
   margin-bottom: 18px;
 }
+
 .header h1 { margin: 0; }
-#logout { position: absolute; right: 0; top: 0; }
+
+#logout {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
 .tabs, .actions {
   display: flex;
   gap: 9px;
   flex-wrap: wrap;
   align-items: center;
 }
+
 .tabs { margin-bottom: 18px; }
+
+.subject-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 10px;
+}
+
+.subject-tab > button {
+  border: 1px solid #cbddeb;
+}
+
+.paint-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 40px;
+  margin: 0 8px 0 0;
+  border: 1px solid #cbddeb;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.paint-button svg {
+  width: 19px;
+  height: 19px;
+  pointer-events: none;
+}
+
+.tab-color-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .timer {
   font-size: 42px;
   font-variant-numeric: tabular-nums;
   margin: 20px 0;
 }
+
 .task-list {
   max-height: 320px;
   overflow-y: auto;
   margin-top: 16px;
   padding-right: 8px;
 }
+
 .task-row, .history-item {
   display: flex;
   gap: 10px;
@@ -97,35 +179,41 @@ button.active { background: var(--cor); }
   padding: 12px 0;
   border-bottom: 1px solid #edf2f7;
 }
-.task-info, .history-info { flex: 1; min-width: 0; }
-.task-done { text-decoration: line-through; color: #7c8b9a; }
+
+.task-info, .history-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-done {
+  text-decoration: line-through;
+  color: #7c8b9a;
+}
+
 .history-info strong { display: block; }
-.subject-accent { border-top: 4px solid var(--cor); }
-.color-picker {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 16px;
+
+.subject-accent {
+  border-top: 4px solid var(--cor);
 }
-.color-picker input {
-  width: 48px;
-  height: 38px;
-  padding: 3px;
-}
+
 canvas { max-width: 100%; }
+
 .auth-switch {
   text-align: center;
   margin-top: 18px;
 }
+
 .auth-switch button {
   border: 0;
   background: transparent;
   color: #326b9d;
   text-decoration: underline;
 }
+
 .message { min-height: 22px; }
 </style>
 </head>
+
 <body>
 <main>
 
@@ -134,16 +222,24 @@ canvas { max-width: 100%; }
 
   <form id="loginForm">
     <label>E-mail
-      <input id="email" type="email" required autocomplete="username">
+      <input id="email" type="email"
+        required autocomplete="username">
     </label>
+
     <label>Senha
       <input id="password" type="password"
         required autocomplete="current-password">
     </label>
-    <button type="submit" style="width:100%">Entrar</button>
+
+    <button type="submit" style="width:100%">
+      Entrar
+    </button>
+
     <div class="auth-switch">
       Não tem uma conta?
-      <button type="button" id="showSignup">Criar conta</button>
+      <button type="button" id="showSignup">
+        Criar conta
+      </button>
     </div>
   </form>
 
@@ -151,21 +247,30 @@ canvas { max-width: 100%; }
     <label>Nome
       <input id="signupName" required maxlength="80">
     </label>
+
     <label>E-mail
       <input id="signupEmail" type="email" required>
     </label>
+
     <label>Senha
       <input id="signupPassword" type="password"
         required minlength="8" autocomplete="new-password">
     </label>
+
     <label>Confirmar senha
       <input id="signupConfirm" type="password"
         required minlength="8" autocomplete="new-password">
     </label>
-    <button type="submit" style="width:100%">Criar minha conta</button>
+
+    <button type="submit" style="width:100%">
+      Criar minha conta
+    </button>
+
     <div class="auth-switch">
       Já tem uma conta?
-      <button type="button" id="showLogin">Entrar</button>
+      <button type="button" id="showLogin">
+        Entrar
+      </button>
     </div>
   </form>
 
@@ -173,6 +278,7 @@ canvas { max-width: 100%; }
 </section>
 
 <section id="app" class="hide">
+
   <header class="header">
     <h1>Painel de Estudos</h1>
     <button id="logout">Sair</button>
@@ -180,47 +286,57 @@ canvas { max-width: 100%; }
 
   <div id="tabs" class="tabs"></div>
 
-  <div class="color-picker">
-    <label for="subjectColor">Cor da matéria:</label>
-    <input id="subjectColor" type="color" value="#bcdcf5">
-  </div>
-
   <div class="grid">
+
     <section class="card subject-accent">
       <h2>Cronograma</h2>
+
       <form id="taskForm">
         <label>Conteúdo / atividade
           <input id="taskTitle" list="suggestions"
-            placeholder="Escolha ou digite um conteúdo" required>
+            placeholder="Escolha ou digite um conteúdo"
+            required>
           <datalist id="suggestions"></datalist>
         </label>
+
         <label>Data de início
           <input id="taskStart" type="date" required>
         </label>
+
         <label>Data final
           <input id="taskEnd" type="date" required>
         </label>
-        <button type="submit">Adicionar atividade</button>
+
+        <button type="submit">
+          Adicionar atividade
+        </button>
       </form>
+
       <div id="tasks" class="task-list"></div>
     </section>
 
     <section class="card subject-accent">
       <h2>Cronômetro</h2>
+
       <p id="currentSubject" class="muted"></p>
+
       <label>Atividade estudada
         <select id="studyTask"></select>
       </label>
+
       <div id="clock" class="timer">00:00:00</div>
+
       <label>Observações
         <textarea id="notes" rows="3"
           placeholder="O que você aprendeu?"></textarea>
       </label>
+
       <div class="actions">
         <button id="start" type="button">Iniciar</button>
         <button id="pause" type="button">Pausar</button>
         <button id="save" type="button">Salvar sessão</button>
       </div>
+
       <p id="saveMessage" class="muted" role="status"></p>
     </section>
   </div>
@@ -230,11 +346,13 @@ canvas { max-width: 100%; }
       <h2>Histórico</h2>
       <div id="history"></div>
     </section>
+
     <section class="card subject-accent">
       <h2>Evolução</h2>
       <canvas id="chart" width="450" height="220"></canvas>
     </section>
   </div>
+
 </section>
 </main>
 
@@ -253,10 +371,12 @@ const pad = n => String(n).padStart(2, '0');
 let user = null;
 let subjects = ['Programação', 'Inglês'];
 let subject = 'Programação';
+
 let colors = {
   'Programação': '#bcdcf5',
   'Inglês': '#c8e6d0'
 };
+
 let tasks = [];
 let sessions = [];
 let elapsed = 0;
@@ -303,6 +423,7 @@ function uid() {
 
 function fmt(s) {
   s = Math.max(0, Math.floor(s));
+
   return [
     Math.floor(s / 3600),
     Math.floor(s % 3600 / 60),
@@ -312,7 +433,9 @@ function fmt(s) {
 
 function formatDate(value) {
   if (!value) return '';
+
   const p = value.slice(0, 10).split('-');
+
   return p.length === 3
     ? `${p[2]}/${p[1]}/${p[0]}`
     : value;
@@ -320,6 +443,7 @@ function formatDate(value) {
 
 function localDate(value = new Date()) {
   const d = new Date(value);
+
   return [
     d.getFullYear(),
     pad(d.getMonth() + 1),
@@ -346,14 +470,19 @@ function key(name) {
 
 function load(name, fallback = []) {
   try {
-    return JSON.parse(localStorage.getItem(key(name))) ?? fallback;
+    return JSON.parse(
+      localStorage.getItem(key(name))
+    ) ?? fallback;
   } catch {
     return fallback;
   }
 }
 
 function store(name, value) {
-  localStorage.setItem(key(name), JSON.stringify(value));
+  localStorage.setItem(
+    key(name),
+    JSON.stringify(value)
+  );
 }
 
 function message(text) {
@@ -406,6 +535,7 @@ $('signupForm').onsubmit = async e => {
     $('signupForm').reset();
     $('signupForm').classList.add('hide');
     $('loginForm').classList.remove('hide');
+
     message(
       'Confira seu e-mail para confirmar a conta. ' +
       'Depois, faça login.'
@@ -436,24 +566,79 @@ $('logout').onclick = async () => {
   location.reload();
 };
 
+// ABAS E CORES INDIVIDUAIS
+
 function renderTabs() {
   $('tabs').innerHTML = '';
 
   subjects.forEach(name => {
+    const group = document.createElement('div');
+    group.className = 'subject-tab';
+
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = name;
     button.classList.toggle('active', name === subject);
-    button.style.background = name === subject
-      ? colors[name] || '#bcdcf5'
-      : '#edf3f8';
+
+    // Mantém a cor mesmo quando a aba não está selecionada.
+    button.style.backgroundColor =
+      colors[name] || '#bcdcf5';
+
     button.onclick = () => selectSubject(name);
-    $('tabs').appendChild(button);
+
+    const paint = document.createElement('label');
+    paint.className = 'paint-button';
+    paint.title = 'Alterar cor de ' + name;
+    paint.setAttribute(
+      'aria-label',
+      'Alterar cor de ' + name
+    );
+
+    paint.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round"
+        aria-hidden="true">
+        <path d="m4 14 9-9 6 6-9 9H4z"/>
+        <path d="m11 7 6 6"/>
+        <path d="M19 17c0 2-2 3-2 4"/>
+      </svg>
+    `;
+
+    const picker = document.createElement('input');
+    picker.type = 'color';
+    picker.className = 'tab-color-input';
+    picker.value = colors[name] || '#bcdcf5';
+    picker.setAttribute(
+      'aria-label',
+      'Cor de ' + name
+    );
+
+    picker.oninput = event => {
+      colors[name] = event.target.value;
+      store('colors', colors);
+
+      button.style.backgroundColor = event.target.value;
+
+      if (subject === name) {
+        document.documentElement.style.setProperty(
+          '--cor',
+          event.target.value
+        );
+        draw();
+      }
+    };
+
+    paint.appendChild(picker);
+    group.appendChild(button);
+    group.appendChild(paint);
+    $('tabs').appendChild(group);
   });
 
   const add = document.createElement('button');
   add.type = 'button';
   add.textContent = '+ Adicionar matéria';
+
   add.onclick = () => {
     if (running || elapsed > 0) {
       alert('Salve a sessão antes de trocar de matéria.');
@@ -472,8 +657,10 @@ function renderTabs() {
 
     subjects.push(name);
     colors[name] = '#d7d5f5';
+
     store('subjects', subjects);
     store('colors', colors);
+
     selectSubject(name);
   };
 
@@ -490,8 +677,12 @@ function selectSubject(name) {
   activeTaskId = '';
 
   const color = colors[name] || '#bcdcf5';
-  document.documentElement.style.setProperty('--cor', color);
-  $('subjectColor').value = color;
+
+  document.documentElement.style.setProperty(
+    '--cor',
+    color
+  );
+
   $('currentSubject').textContent = name;
   $('saveMessage').textContent = '';
 
@@ -504,15 +695,7 @@ function selectSubject(name) {
   render();
 }
 
-$('subjectColor').oninput = e => {
-  colors[subject] = e.target.value;
-  store('colors', colors);
-  document.documentElement.style.setProperty(
-    '--cor', e.target.value
-  );
-  renderTabs();
-  draw();
-};
+// CRONOGRAMA
 
 function renderTasks() {
   const filtered = tasks
@@ -527,15 +710,18 @@ function renderTasks() {
         <input type="checkbox"
           data-check="${safe(t.id)}"
           ${t.done ? 'checked' : ''}>
+
         <div class="task-info">
           <div class="${t.done ? 'task-done' : ''}">
             ${safe(t.name)}
           </div>
+
           <div class="muted">
             ${formatDate(t.start)}
             até ${formatDate(t.end)}
           </div>
         </div>
+
         <button type="button" class="small danger"
           data-task-del="${safe(t.id)}">
           Excluir
@@ -602,14 +788,16 @@ $('tasks').onclick = e => {
   const button = e.target.closest('[data-task-del]');
   if (!button) return;
 
-  const id = button.dataset.taskDel;
-
   if (!confirm('Excluir esta atividade?')) return;
 
+  const id = button.dataset.taskDel;
   tasks = tasks.filter(t => t.id !== id);
+
   store('tasks', tasks);
   render();
 };
+
+// HISTÓRICO
 
 function renderHistory() {
   const filtered = sessions
@@ -621,12 +809,17 @@ function renderHistory() {
     ? filtered.map(s => `
       <div class="history-item">
         <div class="history-info">
-          <strong>${safe(s.content)}</strong>
+          <strong>
+            ${safe(s.content || 'Estudo registrado')}
+          </strong>
+
           <div class="muted">
             ${formatDate(s.date)} · ${fmt(s.seconds)}
           </div>
+
           ${s.notes ? `<p>${safe(s.notes)}</p>` : ''}
         </div>
+
         <button type="button" class="small danger"
           data-session-del="${safe(s.id)}">
           Excluir
@@ -644,9 +837,12 @@ $('history').onclick = e => {
 
   const id = button.dataset.sessionDel;
   sessions = sessions.filter(s => s.id !== id);
+
   store('sessions', sessions);
   render();
 };
+
+// GRÁFICO
 
 function draw() {
   const ctx = $('chart').getContext('2d');
@@ -664,7 +860,10 @@ function draw() {
   ctx.font = '14px sans-serif';
 
   if (!days.length) {
-    ctx.fillText('Nenhum estudo registrado ainda.', 20, 100);
+    ctx.fillText(
+      'Nenhum estudo registrado ainda.',
+      20, 100
+    );
     return;
   }
 
@@ -685,15 +884,22 @@ function draw() {
     const height = 135 * values[i] / max;
 
     ctx.fillStyle = colors[subject] || '#a8d2f0';
+
     ctx.fillRect(
-      x, 170 - height,
+      x,
+      170 - height,
       Math.min(38, slot - 10),
       height
     );
 
     ctx.fillStyle = '#60758b';
     ctx.font = '12px sans-serif';
-    ctx.fillText(formatDate(date).slice(0, 5), x, 192);
+
+    ctx.fillText(
+      formatDate(date).slice(0, 5),
+      x, 192
+    );
+
     ctx.fillText(
       String(Math.round(values[i])),
       x, 162 - height
@@ -707,13 +913,19 @@ function render() {
   draw();
 }
 
+// CRONÔMETRO
+
 function tick() {
   if (running) {
     const now = Date.now();
-    const delta = Math.floor((now - startedAt) / 1000);
+    const delta = Math.floor(
+      (now - startedAt) / 1000
+    );
+
     elapsed += delta;
     startedAt += delta * 1000;
   }
+
   $('clock').textContent = fmt(elapsed);
 }
 
@@ -756,7 +968,9 @@ $('save').onclick = async () => {
     return;
   }
 
-  const task = tasks.find(t => t.id === activeTaskId);
+  const task = tasks.find(
+    t => t.id === activeTaskId
+  );
 
   if (!task) {
     alert('Selecione uma atividade.');
@@ -787,9 +1001,11 @@ $('save').onclick = async () => {
 
   elapsed = 0;
   activeTaskId = '';
+
   $('clock').textContent = fmt(0);
   $('notes').value = '';
   $('saveMessage').textContent = 'Sessão salva.';
+
   render();
 
   const { error } = await sb
@@ -806,15 +1022,22 @@ $('save').onclick = async () => {
 
   if (error) {
     console.warn('Erro de sincronização:', error);
+
     $('saveMessage').textContent =
       'Salvo neste navegador. Sincronização pendente.';
   }
 };
 
+// INICIALIZAÇÃO
+
 async function enter(u) {
   user = u;
 
-  subjects = load('subjects', ['Programação', 'Inglês']);
+  subjects = load(
+    'subjects',
+    ['Programação', 'Inglês']
+  );
+
   colors = load('colors', colors);
 
   tasks = load('tasks').map(t => ({
@@ -839,7 +1062,10 @@ async function enter(u) {
 
 async function authState() {
   const { data } = await sb.auth.getUser();
-  if (data.user) await enter(data.user);
+
+  if (data.user) {
+    await enter(data.user);
+  }
 }
 
 authState();
