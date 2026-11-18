@@ -1,1 +1,422 @@
-:root{font-family:system-ui,Arial,sans-serif;color:#24354b;background:#f3f8fc;color-scheme:light;--cor:#bcdcf5}*{box-sizing:border-box}body{margin:0}main{max-width:1080px;margin:20px auto;padding:16px}.card{background:white;border:1px solid #dce9f4;border-radius:16px;padding:22px;margin-bottom:16px}h1{font-size:25px}h2{font-size:19px;margin-top:0}label{display:block;margin:12px 0}input,textarea,select,button{font:inherit;border:1px solid #cbddeb;border-radius:9px;padding:11px}input:not([type=checkbox]):not([type=color]),textarea,select{width:100%;margin-top:6px;background:white;color:#24354b}button{background:#bcdcf5;color:#173957;cursor:pointer;font-weight:600}button:hover{filter:brightness(.96)}button:disabled{opacity:.55;cursor:wait}.active{outline:2px solid #24354b;outline-offset:2px}.danger{background:#f5dede}.small{padding:6px 9px}.muted{color:#60758b;font-size:14px}.hide{display:none!important}.wide{width:100%}.center{text-align:center}.link{border:0;background:transparent;color:#326b9d;text-decoration:underline}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid>.card{min-width:0}@media(max-width:700px){.grid{grid-template-columns:1fr}}.auth{max-width:420px;margin:10vh auto}.auth h1{text-align:center}.header{position:relative;text-align:center;padding:8px 75px;margin-bottom:18px}.header h1{margin:0}#logout{position:absolute;right:0;top:0}.tabs,.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.tabs{margin-bottom:18px}.subject-tab{display:inline-flex;align-items:center;gap:5px}.paint-button{position:relative;display:inline-flex;align-items:center;justify-content:center;width:36px;height:40px;margin:0 8px 0 0;border:1px solid #cbddeb;border-radius:9px;background:white;cursor:pointer;overflow:hidden}.paint-button svg{width:19px;height:19px;pointer-events:none}.tab-color-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.timer{font-size:42px;font-variant-numeric:tabular-nums;margin:20px 0}.task-list{max-height:320px;overflow-y:auto;margin-top:16px;padding-right:8px}.task-row,.history-item{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #edf2f7}.task-info,.history-info{flex:1;min-width:0}.task-done{text-decoration:line-through;color:#7c8b9a}.history-info strong{display:block}.accent{border-top:4px solid var(--cor)}canvas{max-width:100%}
+
+/* ========================================
+   PAINEL DE ESTUDOS
+   Estilos gerais
+======================================== */
+
+:root {
+  font-family: system-ui, Arial, sans-serif;
+  color: #24354b;
+  background: #f3f8fc;
+  color-scheme: light;
+  --cor: #bcdcf5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 1080px;
+  margin: 20px auto;
+  padding: 16px;
+}
+
+h1 {
+  font-size: 25px;
+}
+
+h2 {
+  font-size: 19px;
+  margin-top: 0;
+}
+
+/* ========================================
+   CARDS E LAYOUT
+======================================== */
+
+.card {
+  background: #fff;
+  border: 1px solid #dce9f4;
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.grid > .card {
+  min-width: 0;
+}
+
+.accent,
+.subject-accent {
+  border-top: 4px solid var(--cor);
+}
+
+/* ========================================
+   CAMPOS E BOTÕES
+======================================== */
+
+label {
+  display: block;
+  margin: 12px 0;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+  border: 1px solid #cbddeb;
+  border-radius: 9px;
+  padding: 11px;
+}
+
+input:not([type="checkbox"]):not([type="color"]),
+textarea,
+select {
+  width: 100%;
+  margin-top: 6px;
+  background: #fff;
+  color: #24354b;
+}
+
+button {
+  background: #bcdcf5;
+  color: #173957;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  filter: brightness(0.96);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.active {
+  outline: 2px solid #24354b;
+  outline-offset: 2px;
+}
+
+.danger {
+  background: #f5dede;
+}
+
+.small {
+  padding: 6px 9px;
+}
+
+.wide {
+  width: 100%;
+}
+
+.center {
+  text-align: center;
+}
+
+.muted {
+  color: #60758b;
+  font-size: 14px;
+}
+
+.hide {
+  display: none !important;
+}
+
+.message {
+  min-height: 22px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+/* ========================================
+   LOGIN E CADASTRO
+======================================== */
+
+#auth,
+.auth {
+  width: min(420px, 100%);
+  max-width: 420px;
+  margin: 10vh auto;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px #24354b10;
+}
+
+#auth h1,
+.auth h1 {
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+#auth label,
+.auth label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+#auth form > button[type="submit"],
+.auth form > button[type="submit"] {
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px;
+  border: 0;
+  background: #bcdcf5;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.auth-switch button,
+.link {
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  color: #326b9d;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ========================================
+   CABEÇALHO
+======================================== */
+
+.header {
+  position: relative;
+  text-align: center;
+  padding: 8px 75px;
+  margin-bottom: 18px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+#logout {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+/* ========================================
+   ABAS DAS MATÉRIAS
+======================================== */
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.subject-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.subject-name {
+  border-radius: 10px 0 0 10px;
+  border-right: 0;
+}
+
+.subject-arrow {
+  width: 34px;
+  padding: 8px;
+  border-radius: 0 10px 10px 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* ========================================
+   MENU DAS MATÉRIAS
+======================================== */
+
+.subject-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 999;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  width: 190px;
+  padding: 8px;
+
+  background: #fff;
+  border: 1px solid #dce9f4;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px #24354b25;
+}
+
+.subject-menu.hide {
+  display: none !important;
+}
+
+.subject-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  font-size: 14px;
+}
+
+.subject-menu button:hover {
+  background: #edf5fc;
+}
+
+.subject-menu .menu-danger {
+  color: #a52c3b;
+}
+
+.menu-color-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.menu-color-label input {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+  cursor: pointer;
+}
+
+/* ========================================
+   CRONOGRAMA
+======================================== */
+
+.task-list {
+  max-height: 320px;
+  overflow-y: auto;
+  margin-top: 16px;
+  padding-right: 8px;
+}
+
+.task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.task-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-done {
+  text-decoration: line-through;
+  color: #7c8b9a;
+}
+
+/* ========================================
+   CRONÔMETRO
+======================================== */
+
+.timer {
+  font-size: 42px;
+  font-variant-numeric: tabular-nums;
+  margin: 20px 0;
+}
+
+/* ========================================
+   HISTÓRICO
+======================================== */
+
+.history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.history-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-info strong {
+  display: block;
+}
+
+/* ========================================
+   GRÁFICO
+======================================== */
+
+canvas {
+  max-width: 100%;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  main {
+    margin: 10px auto;
+    padding: 12px;
+  }
+
+  .header {
+    padding: 8px 60px;
+  }
+
+  .header h1 {
+    font-size: 21px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .timer {
+    font-size: 36px;
+  }
+
+  .tabs {
+    gap: 10px;
+  }
+
+  .subject-menu {
+    width: 180px;
+  }
+}
